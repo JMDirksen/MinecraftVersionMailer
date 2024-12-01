@@ -20,7 +20,7 @@ MAIL_TO = getenv('MAIL_TO') or ""
 
 
 def main():
-    global db
+    global db, first_run
     db = loadDb()
     while True:
         print("Checking...")
@@ -29,6 +29,7 @@ def main():
         process_variant_type("bedrock", "release")
         process_variant_type("bedrock", "preview")
         saveDb(db)
+        first_run = False
         print("Zzz...")
         sleep(INTERVAL)
 

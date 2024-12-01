@@ -8,7 +8,7 @@ Python script for sending email when a new Minecraft version has been released
 git clone https://github.com/JMDirksen/MinecraftVersionMailer.git
 cd MinecraftVersionMailer
 docker build -t minecraftversionmailer .
-docker run -d \
+docker run -dt \
   --name minecraftversionmailer \
   -e INTERVAL=900 \
   -e MAIL_SERVER="smtp.gmail.com" \
