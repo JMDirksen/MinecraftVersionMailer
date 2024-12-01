@@ -1,3 +1,4 @@
+from os import getenv
 import json
 from urllib.request import urlopen, Request
 import re
@@ -6,16 +7,28 @@ import smtplib
 import ssl
 import zlib
 from base64 import urlsafe_b64encode as b64e, urlsafe_b64decode as b64d
+from time import sleep
+
+# Get/set environment variables / defaults
+INTERVAL = int(getenv('INTERVAL') or 900)
+MAIL_SERVER = getenv('MAIL_SERVER') or "smtp.gmail.com"
+MAIL_PORT = int(getenv('MAIL_PORT') or 465)
+MAIL_USER = getenv('MAIL_USER') or ""
+MAIL_PASS = getenv('MAIL_PASS') or ""
+MAIL_FROM = getenv('MAIL_FROM') or ""
+MAIL_TO = getenv('MAIL_TO') or ""
 
 
 def main():
     global db
     db = loadDb()
-    process_variant_type("java", "release")
-    process_variant_type("java", "snapshot")
-    process_variant_type("bedrock", "release")
-    process_variant_type("bedrock", "preview")
-    saveDb(db)
+    while True:
+        process_variant_type("java", "release")
+        process_variant_type("java", "snapshot")
+        process_variant_type("bedrock", "release")
+        process_variant_type("bedrock", "preview")
+        saveDb(db)
+        sleep(INTERVAL)
 
 
 def process_variant_type(variant, type):
@@ -32,22 +45,14 @@ def process_variant_type(variant, type):
 
 
 def send_mail(subject, message):
-    server = db["config"]["mail_server"]
-    port = db["config"]["mail_port"]
     context = ssl.create_default_context()
-    username = db["config"]["mail_username"]
-    password = unobscure(db["config"]["mail_password"])
-    from_address = db["config"]["mail_from"]
-    to_address = db["config"]["mail_to"]
-
     msg = EmailMessage()
-    msg["From"] = from_address
-    msg["To"] = to_address
+    msg["From"] = MAIL_FROM
+    msg["To"] = MAIL_TO
     msg["Subject"] = subject
     msg.set_content(message)
-
-    with smtplib.SMTP_SSL(server, port, context=context) as smtp:
-        smtp.login(username, password)
+    with smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, context=context) as smtp:
+        smtp.login(MAIL_USER, MAIL_PASS)
         smtp.send_message(msg)
 
 
@@ -64,24 +69,8 @@ def loadDb():
         with open("db.json", "r") as f:
             return json.load(f)
     except FileNotFoundError:
-        mail_server = input("Mailserver (Like: smtp.gmail.com): ")
-        mail_port = input("Mailserver port (Like: 465): ")
-        mail_username = input("Mail username (Like: user@gmail.com): ")
-        mail_password = obscure(
-            input("Mail password (Google App password?): "))
-        mail_from = input(
-            "Mail from address (Like: Recipient name <recipient@gmail.com>): ")
-        mail_to = input("Mail to address (Like: recipient@gmail.com): ")
         with open("db.json", "w") as f:
             db = {
-                "config": {
-                    "mail_server": mail_server,
-                    "mail_port": mail_port,
-                    "mail_username": mail_username,
-                    "mail_password": mail_password,
-                    "mail_from": mail_from,
-                    "mail_to": mail_to,
-                },
                 "java": {
                     "release": {"versions": []},
                     "snapshot": {"versions": []},
