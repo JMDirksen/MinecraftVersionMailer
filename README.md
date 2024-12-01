@@ -20,5 +20,5 @@ docker run -dt \
   --restart unless-stopped \
   minecraftversionmailer
 docker ps
-docker logs minecraftversionmailer
+docker logs -tf minecraftversionmailer
 ```
