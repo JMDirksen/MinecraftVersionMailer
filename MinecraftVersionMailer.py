@@ -23,11 +23,13 @@ def main():
     global db
     db = loadDb()
     while True:
+        print("Checking...")
         process_variant_type("java", "release")
         process_variant_type("java", "snapshot")
         process_variant_type("bedrock", "release")
         process_variant_type("bedrock", "preview")
         saveDb(db)
+        print("Zzz...")
         sleep(INTERVAL)
 
 
@@ -37,11 +39,15 @@ def process_variant_type(variant, type):
     if version and version["id"] not in db[variant][type]["versions"]:
         db[variant][type]["versions"] += [version["id"]]
         db[variant][type]["latest"] = version["id"]
-        subject = f"New Minecraft {variant.capitalize()} {type} version {
-            version["id"]}"
-        message = f"Minecraft {variant.capitalize()} {type} version {
-            version["id"]} has been released."
-        send_mail(subject, message)
+        if not first_run:
+            subject = f"New Minecraft {variant.capitalize()} {type} version {
+                version["id"]}"
+            message = f"Minecraft {variant.capitalize()} {type} version {
+                version["id"]} has been released."
+            print(f"Sending mail for {variant.capitalize()} {type} version {version["id"]}")
+            send_mail(subject, message)
+        else:
+            print("Skipped sending mail on first run.")
 
 
 def send_mail(subject, message):
@@ -65,8 +71,10 @@ def unobscure(obscured: str) -> str:
 
 
 def loadDb():
+    global first_run
     try:
         with open("db.json", "r") as f:
+            first_run = False
             return json.load(f)
     except FileNotFoundError:
         with open("db.json", "w") as f:
@@ -79,8 +87,10 @@ def loadDb():
                     "release": {"versions": []},
                     "preview": {"versions": []},
                 },
+                "first_run": True
             }
             f.write(json.dumps(db))
+            first_run = True
             return db
 
 
