@@ -1,0 +1,12 @@
+services:
+  minecraftversionmailer:
+    image: minecraftversionmailer
+    environment:
+      INTERVAL: 900
+      MAIL_SERVER: smtp.gmail.com
+      MAIL_PORT: 465
+      MAIL_USER: 
+      MAIL_PASS: 
+      MAIL_FROM: 
+      MAIL_TO: 
+    restart: unless-stopped

@@ -12,4 +12,4 @@ ENV MAIL_PASS=""
 ENV MAIL_FROM=""
 ENV MAIL_TO=""
 
-CMD [ "python", "./MinecraftVersionMailer.py" ]
+CMD [ "python", "-u", "./MinecraftVersionMailer.py" ]

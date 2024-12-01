@@ -10,7 +10,7 @@ Before running the container don't forget to fill out the MAIL_ environment vari
 git clone https://github.com/JMDirksen/MinecraftVersionMailer.git
 cd MinecraftVersionMailer
 docker build -t minecraftversionmailer .
-docker run -dt \
+docker run -d \
   --name minecraftversionmailer \
   -e INTERVAL=900 \
   -e MAIL_SERVER="smtp.gmail.com" \
